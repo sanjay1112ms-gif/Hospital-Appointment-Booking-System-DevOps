@@ -31,22 +31,17 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                script {
-                    def scannerHome = tool 'SonarScanner'
-
-                    withSonarQubeEnv('SonarQube') {
-                        withCredentials([string(credentialsId: 'sonartoken', variable: 'SONAR_TOKEN')]) {
-
-                            sh """
-                                ${scannerHome}/bin/sonar-scanner \
-                                -Dsonar.projectKey=hospital-appointment-booking-system \
-                                -Dsonar.projectName=Hospital-Appointment-Booking-System \
-                                -Dsonar.sources=. \
-                                -Dsonar.token=\$SONAR_TOKEN
-                            """
-
-                        }
-                    }
+                withCredentials([string(credentialsId: 'sonartoken', variable: 'SONAR_TOKEN')]) {
+                    sh '''
+                    docker run --rm \
+                    -v "$PWD":/usr/src \
+                    sonarsource/sonar-scanner-cli:latest \
+                    -Dsonar.host.url=http://172.17.0.3:9000 \
+                    -Dsonar.token=$SONAR_TOKEN \
+                    -Dsonar.projectKey=hospital-appointment-booking-system \
+                    -Dsonar.projectName=Hospital-Appointment-Booking-System \
+                    -Dsonar.sources=.
+                    '''
                 }
             }
         }
