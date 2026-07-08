@@ -3,7 +3,9 @@ pipeline {
 
     tools {
         nodejs 'Node18'
+        sonarQube 'SonarScanner'
     }
+
     stages {
 
         stage('Checkout') {
@@ -24,6 +26,19 @@ pipeline {
             steps {
                 dir('frontend') {
                     sh 'npm install --legacy-peer-deps'
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                    sonar-scanner \
+                    -Dsonar.projectKey=hospital-appointment-booking-system \
+                    -Dsonar.projectName=Hospital-Appointment-Booking-System \
+                    -Dsonar.sources=.
+                    '''
                 }
             }
         }
