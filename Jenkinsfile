@@ -3,7 +3,6 @@ pipeline {
 
     tools {
         nodejs 'Node18'
-        sonarQube 'SonarScanner'
     }
 
     stages {
@@ -32,13 +31,16 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh '''
-                    sonar-scanner \
-                    -Dsonar.projectKey=hospital-appointment-booking-system \
-                    -Dsonar.projectName=Hospital-Appointment-Booking-System \
-                    -Dsonar.sources=.
-                    '''
+                script {
+                    def scannerHome = tool 'SonarScanner'
+                    withSonarQubeEnv('SonarQube') {
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=hospital-appointment-booking-system \
+                            -Dsonar.projectName=Hospital-Appointment-Booking-System \
+                            -Dsonar.sources=.
+                        """
+                    }
                 }
             }
         }
