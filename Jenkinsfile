@@ -1,18 +1,14 @@
 pipeline {
     agent any
-
     tools {
         nodejs 'Node18'
     }
-
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-
         stage('Backend Install') {
             steps {
                 dir('backend') {
@@ -20,7 +16,6 @@ pipeline {
                 }
             }
         }
-
         stage('Frontend Install') {
             steps {
                 dir('frontend') {
@@ -28,14 +23,13 @@ pipeline {
                 }
             }
         }
-
         stage('SonarQube Analysis') {
             steps {
                 withCredentials([string(credentialsId: 'sonartoken', variable: 'SONAR_TOKEN')]) {
                     sh '''
                     docker run --rm \
                     -v "$PWD":/usr/src \
-                    sonarsource/sonar-scanner-cli:latest \
+                    sonarsource/sonar-scanner-cli:11 \
                     -Dsonar.host.url=http://172.17.0.3:9000 \
                     -Dsonar.token=$SONAR_TOKEN \
                     -Dsonar.projectKey=hospital-appointment-booking-system \
@@ -45,14 +39,12 @@ pipeline {
                 }
             }
         }
-
         stage('Build Docker Images') {
             steps {
                 sh 'docker build -t sanjay1112ms/hospital-backend:v1 ./backend'
                 sh 'docker build -t sanjay1112ms/hospital-frontend:v1 ./frontend'
             }
         }
-
         stage('Docker Images') {
             steps {
                 sh 'docker images'
